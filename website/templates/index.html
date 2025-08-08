@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spam Detection System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .main-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            margin: 2rem auto;
+            max-width: 1200px;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 20px 20px 0 0;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 2rem;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            font-weight: 600;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 25px;
+            padding: 12px 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        .form-control {
+            border-radius: 15px;
+            border: 2px solid #e9ecef;
+            padding: 15px;
+            transition: all 0.3s ease;
+        }
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        .result-card {
+            border-radius: 15px;
+            margin-top: 1rem;
+        }
+        .spam-result {
+            border-left: 5px solid #dc3545;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            color: white;
+        }
+        .ham-result {
+            border-left: 5px solid #28a745;
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+            color: white;
+        }
+        .progress {
+            height: 25px;
+            border-radius: 15px;
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        .progress-bar {
+            border-radius: 15px;
+            font-weight: 600;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+        .nav-tabs {
+            border-bottom: 2px solid #e9ecef;
+        }
+        .nav-tabs .nav-link {
+            border: none;
+            border-radius: 15px 15px 0 0;
+            margin-right: 5px;
+            font-weight: 600;
+            color: #6c757d;
+        }
+        .nav-tabs .nav-link.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .alert {
+            border-radius: 15px;
+            border: none;
+        }
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="main-container">
+            <!-- Header -->
+            <div class="header">
+                <h1><i class="fas fa-shield-alt"></i> Spam Detection System</h1>
+                <p>Advanced Machine Learning-powered Email Spam Detection</p>
+            </div>
+            <!-- Content -->
+            <div class="content">
+                <!-- Navigation Tabs -->
+                <ul class="nav nav-tabs mb-4" id="mainTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="detection-tab" data-bs-toggle="tab" data-bs-target="#detection" type="button" role="tab">
+                            <i class="fas fa-search"></i> Spam Detection
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="dashboard-tab" data-bs-toggle="tab" data-bs-target="#dashboard" type="button" role="tab">
+                            <i class="fas fa-chart-bar"></i> Dashboard
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="about-tab" data-bs-toggle="tab" data-bs-target="#about" type="button" role="tab">
+                            <i class="fas fa-info-circle"></i> About
+                        </button>
+                    </li>
+                </ul>
+                <!-- Tab Content -->
+                <div class="tab-content" id="mainTabsContent">
+                    <!-- Spam Detection Tab -->
+                    <div class="tab-pane fade show active" id="detection" role="tabpanel">
+                        <div class="row">
+                            <div class="col-lg-8">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5><i class="fas fa-envelope"></i> Email Spam Detection</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <form id="predictionForm">
+                                            <div class="mb-3">
+                                                <label for="emailText" class="form-label">Enter Email Text:</label>
+                                                <textarea class="form-control" id="emailText" rows="8" 
+                                                          placeholder="Paste your email content here..."></textarea>
+                                            </div>
+                                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                                <button type="button" class="btn btn-secondary me-md-2" onclick="clearForm()">
+                                                    <i class="fas fa-eraser"></i> Clear
+                                                </button>
+                                                <button type="submit" class="btn btn-primary">
+                                                    <i class="fas fa-search"></i> Detect Spam
+                                                </button>
+                                            </div>
+                                        </form>
+                                        <!-- Loading -->
+                                        <div class="loading" id="loading">
+                                            <div class="spinner-border text-primary" role="status">
+                                                <span class="visually-hidden">Loading...</span>
+                                            </div>
+                                            <p class="mt-3">Analyzing your email...</p>
+                                        </div>
+                                        <!-- Results -->
+                                        <div id="results" style="display: none;">
+                                            <h5 class="mt-4 mb-3">Detection Results:</h5>
+                                            <div id="resultCards"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5><i class="fas fa-cogs"></i> Model Training</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="text-muted">Train the machine learning models to get started with spam detection.</p>
+                                        <button type="button" class="btn btn-primary w-100" onclick="trainModels()">
+                                            <i class="fas fa-play"></i> Train Models
+                                        </button>
+                                        <div class="mt-3" id="trainingStatus"></div>
+                                    </div>
+                                </div>
+                                <div class="card mt-3">
+                                    <div class="card-header">
+                                        <h5><i class="fas fa-lightbulb"></i> Tips</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="list-unstyled">
+                                            <li><i class="fas fa-check text-success"></i> Use complete email content</li>
+                                            <li><i class="fas fa-check text-success"></i> Include subject line if available</li>
+                                            <li><i class="fas fa-check text-success"></i> Models trained on real spam data</li>
+                                            <li><i class="fas fa-check text-success"></i> Multiple algorithms for accuracy</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Dashboard Tab -->
+                    <div class="tab-pane fade" id="dashboard" role="tabpanel">
+                        <iframe src="/dashboard" style="width:100%;height:1200px;border:none;"></iframe>
+                    </div>
+                    <!-- About Tab -->
+                    <div class="tab-pane fade" id="about" role="tabpanel">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5><i class="fas fa-info-circle"></i> About This System</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <h6>Advanced Spam Detection</h6>
+                                        <p>This system uses multiple machine learning algorithms to detect spam emails with high accuracy:</p>
+                                        <ul>
+                                            <li><strong>Naive Bayes:</strong> Fast and effective for text classification</li>
+                                            <li><strong>Random Forest:</strong> Robust ensemble method with feature importance</li>
+                                            <li><strong>XGBoost:</strong> High-performance gradient boosting</li>
+                                        </ul>
+                                        <h6>Features</h6>
+                                        <ul>
+                                            <li>TF-IDF text vectorization</li>
+                                            <li>Real-time prediction</li>
+                                            <li>Performance visualizations</li>
+                                            <li>Multiple model comparison</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5><i class="fas fa-database"></i> Dataset Information</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <h6>Training Data</h6>
+                                        <p>The models are trained on:</p>
+                                        <ul>
+                                            <li>Processed email dataset</li>
+                                            <li>Enron spam dataset</li>
+                                            <li>Combined for robust training</li>
+                                        </ul>
+                                        <h6>Performance Metrics</h6>
+                                        <ul>
+                                            <li>Accuracy, Precision, Recall</li>
+                                            <li>F1-Score for balanced evaluation</li>
+                                            <li>ROC curves and AUC scores</li>
+                                            <li>Confusion matrices</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Train models
+        function trainModels() {
+            const statusDiv = document.getElementById('trainingStatus');
+            statusDiv.innerHTML = '<div class="alert alert-info"><i class="fas fa-spinner fa-spin"></i> Training models...</div>';
+            fetch('/train')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        statusDiv.innerHTML = '<div class="alert alert-success"><i class="fas fa-check"></i> Models trained successfully!</div>';
+                        document.getElementById('predictionForm').style.display = 'block';
+                    } else {
+                        statusDiv.innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> ${data.error}</div>`;
+                    }
+                })
+                .catch(error => {
+                    statusDiv.innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> Error: ${error}</div>`;
+                });
+        }
+        // Handle form submission
+        document.getElementById('predictionForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const text = document.getElementById('emailText').value.trim();
+            if (!text) {
+                alert('Please enter some text to analyze.');
+                return;
+            }
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            fetch('/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ text: text })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('loading').style.display = 'none';
+                if (data.success) {
+                    displayResults(data.predictions, data.text);
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                document.getElementById('loading').style.display = 'none';
+                alert('Error: ' + error);
+            });
+        });
+        // Display results
+        function displayResults(predictions, text) {
+            const resultCards = document.getElementById('resultCards');
+            resultCards.innerHTML = '';
+            Object.entries(predictions).forEach(([model, result]) => {
+                const isSpam = result.prediction === 'Spam';
+                const cardClass = isSpam ? 'spam-result' : 'ham-result';
+                const icon = isSpam ? 'fa-exclamation-triangle' : 'fa-check-circle';
+                const card = `
+                    <div class="card result-card ${cardClass} mb-3">
+                        <div class="card-body">
+                            <h6 class="card-title">
+                                <i class="fas ${icon}"></i> ${model}
+                            </h6>
+                            <p class="card-text">
+                                <strong>Prediction:</strong> ${result.prediction}<br>
+                                <strong>Confidence:</strong> ${(Math.max(result.ham_probability, result.spam_probability) * 100).toFixed(1)}%
+                            </p>
+                            <div class="progress mb-2">
+                                <div class="progress-bar bg-success" style="width: ${result.ham_probability * 100}%">
+                                    Ham: ${(result.ham_probability * 100).toFixed(1)}%
+                                </div>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar bg-danger" style="width: ${result.spam_probability * 100}%">
+                                    Spam: ${(result.spam_probability * 100).toFixed(1)}%
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                resultCards.innerHTML += card;
+            });
+            document.getElementById('results').style.display = 'block';
+        }
+        // Clear form
+        function clearForm() {
+            document.getElementById('emailText').value = '';
+            document.getElementById('results').style.display = 'none';
+        }
+    </script>
+</body>
+</html> 

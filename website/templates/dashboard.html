@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spam Detection Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .dashboard-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            margin: 2rem auto;
+            max-width: 1400px;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 20px 20px 0 0;
+            text-align: center;
+        }
+        .content {
+            padding: 2rem;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            font-weight: 600;
+        }
+        .metric-card {
+            text-align: center;
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-bottom: 1rem;
+        }
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        .metric-label {
+            font-size: 1rem;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .accuracy-card {
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+            color: white;
+        }
+        .precision-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .recall-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+        .f1-card {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+        .plot-container {
+            text-align: center;
+            margin: 1rem 0;
+        }
+        .plot-container img {
+            max-width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        .btn-back {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 25px;
+            padding: 12px 30px;
+            font-weight: 600;
+            color: white;
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 2rem;
+        }
+        .btn-back:hover {
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="dashboard-container">
+            <!-- Header -->
+            <div class="header">
+                <h1><i class="fas fa-chart-line"></i> Model Performance Dashboard</h1>
+                <p>Comprehensive analysis of spam detection model performance</p>
+            </div>
+            <!-- Content -->
+            <div class="content">
+                {% if not trained %}
+                <div class="text-center">
+                    <i class="fas fa-chart-bar" style="font-size: 4rem; color: #667eea; margin-bottom: 2rem;"></i>
+                    <h3>Models Not Trained</h3>
+                    <p class="text-muted">Please train the models first to view the dashboard.</p>
+                    <a href="/" class="btn-back">
+                        <i class="fas fa-arrow-left"></i> Back to Detection
+                    </a>
+                </div>
+                {% else %}
+                <!-- Back Button -->
+                <a href="/" class="btn-back">
+                    <i class="fas fa-arrow-left"></i> Back to Detection
+                </a>
+                <!-- Performance Metrics -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-tachometer-alt"></i> Model Performance Metrics</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            {% for model_name, metrics in results.items() %}
+                            <div class="col-lg-4 col-md-6">
+                                <h6 class="text-center mb-3">{{ model_name }}</h6>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="metric-card accuracy-card">
+                                            <div class="metric-value">{{ "%.3f"|format(metrics.accuracy) }}</div>
+                                            <div class="metric-label">Accuracy</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="metric-card precision-card">
+                                            <div class="metric-value">{{ "%.3f"|format(metrics.precision) }}</div>
+                                            <div class="metric-label">Precision</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="metric-card recall-card">
+                                            <div class="metric-value">{{ "%.3f"|format(metrics.recall) }}</div>
+                                            <div class="metric-label">Recall</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="metric-card f1-card">
+                                            <div class="metric-value">{{ "%.3f"|format(metrics.f1_score) }}</div>
+                                            <div class="metric-label">F1-Score</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <!-- Visualizations -->
+                {% if plots %}
+                <!-- Performance Comparison -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-chart-bar"></i> Model Performance Comparison</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="plot-container">
+                            <img src="data:image/png;base64,{{ plots.performance_comparison }}" alt="Performance Comparison">
+                        </div>
+                    </div>
+                </div>
+                <!-- Confusion Matrices -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-th"></i> Confusion Matrices</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="plot-container">
+                            <img src="data:image/png;base64,{{ plots.confusion_matrices }}" alt="Confusion Matrices">
+                        </div>
+                    </div>
+                </div>
+                <!-- ROC Curves -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-chart-line"></i> ROC Curves</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="plot-container">
+                            <img src="data:image/png;base64,{{ plots.roc_curves }}" alt="ROC Curves">
+                        </div>
+                    </div>
+                </div>
+                <!-- Feature Importance -->
+                {% if plots.feature_importance %}
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-star"></i> Feature Importance</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="plot-container">
+                            <img src="data:image/png;base64,{{ plots.feature_importance }}" alt="Feature Importance">
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                <!-- Data Distribution -->
+                {% if plots.data_distribution %}
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-pie-chart"></i> Dataset Analysis</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="plot-container">
+                            <img src="data:image/png;base64,{{ plots.data_distribution }}" alt="Data Distribution">
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                {% endif %}
+                <!-- Model Details -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-info-circle"></i> Model Details</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Algorithms Used:</h6>
+                                <ul>
+                                    <li><strong>Naive Bayes:</strong> Fast probabilistic classifier</li>
+                                    <li><strong>Random Forest:</strong> Ensemble of decision trees</li>
+                                    <li><strong>XGBoost:</strong> Gradient boosting framework</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Features:</h6>
+                                <ul>
+                                    <li>TF-IDF text vectorization</li>
+                                    <li>N-gram features (unigrams + bigrams)</li>
+                                    <li>Stop word removal</li>
+                                    <li>Feature selection (top 3000 features)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 
